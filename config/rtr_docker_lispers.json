@@ -1,0 +1,304 @@
+{
+    "switch_name": "s1", 
+    "port": 50051, 
+    "device_id": 0, 
+    "controller_interface": "s1-eth1",
+    "encapsulation_ip": "172.17.0.2", 
+    "known_src_eids": {},
+    "lispers_connection": "udp",
+    "lispers_path": "/home/nickjan/container/lispers_eval_1/lispers.net/",
+    "instance_id": 0,
+    "home_directory": "/home/nickjan/",
+    "p4info_file_path": "/home/nickjan/lisp_node.p4info.pb.txt",
+    "bmv2_file_path": "/home/nickjan/lisp_node/pipe/context.json",
+    "bin_file_path": "/home/nickjan/lisp_node/pipe/tofino.bin",
+    "program_name": "lisp_node",
+    "channel_tofino": 0,
+    "used_ports": [1,2,29],
+    "standard_loopback_port": 29,
+    "pipelines": {
+      "0": {
+        "port_range": [0, 256],
+        "loopback_ports": [68]
+      },
+      "1": {
+        "port_range": [0, 8],
+        "loopback_ports": [196]
+      },
+      "2": {
+        "port_range": [0, 8],
+        "loopback_ports": [324]
+      },
+      "3": {
+        "port_range": [0, 8],
+        "loopback_ports": [452]
+      }
+    },
+    "lisp_node_type": "rtr",
+    "standard_petr": "",
+    "natively_forward_port": 2,
+    "inner_ports": [1],
+    "LISP-NAT": false,
+    "prefixes_LISP-R": ["192.168.0.0/28"],
+    "LISP_address_spaces": ["10.0.0.0/8"],
+
+  
+    "tofino_config": [
+      {
+        "port": 1,
+        "channel": 0,
+        "speed": 2,
+        "flood": false,
+        "breakout": 4
+      },
+      {
+        "port": 2,
+        "channel": 0,
+        "speed": 2,
+        "flood": false,
+        "breakout": 4
+      },
+      {
+        "port": 29,
+        "channel": 0,
+        "speed": 7,
+        "flood": false,
+        "loopback": true
+      }
+    ],
+  
+    "table_entries": [
+  
+      {
+        "table": "SwitchIngress.decapsulate_lpm",
+        "match_field_type": ["prefix"],
+        "match": {
+          "hdr.ipv4.dstAddr":{"eid": "15.15.15.1", "mask": 32}
+        },
+        "action_name": "SwitchIngress.decapsulate_packet",
+        "action_params": {}
+      },
+  
+      
+      {
+        "table": "SwitchIngress.allowed_prefixes_lpm",
+        "match_field_type": ["prefix", "port"],
+        "match": {
+          "hdr.ipv4.srcAddr": {"eid": "10.0.0.0", "mask": 8},
+          "ig_intr_md.ingress_port": {"port": 1}
+        },
+        "action_name": "NoAction",
+        "action_params": {}
+      },
+      {
+        "table": "SwitchIngress.valid_lisp_destinations_lpm",
+        "match_field_type": ["prefix", "port"],
+        "match": {
+          "hdr.ipv4.dstAddr": {"eid": "10.0.0.0", "mask": 8}
+        },
+        "action_name": "SwitchIngress.pick_up",
+        "action_params": {}
+      },
+      {
+        "table": "SwitchIngress.valid_lisp_destinations_lpm",
+        "match_field_type": ["prefix", "port"],
+        "match": {
+          "hdr.ipv4.dstAddr": {"eid": "224.0.0.0", "mask": 8}
+        },
+        "action_name": "SwitchIngress.pick_up",
+        "action_params": {}
+      },
+
+
+      
+      {
+        "table": "SwitchIngress.encapsulate_lpm",
+        "priority": 253,
+        "match_field_type": ["prefix", "range"],
+        "match": {
+          "hdr.ipv4.dstAddr": {"eid": "10.1.1.1", "mask": 32},
+          "ig_md.rnd_load_balance_group": {"low": 0, "high": 127}
+        },
+        "action_name": "SwitchIngress.encapsulate_packet",
+        "action_params": {
+          "switch_src": "15.15.15.1",
+          "switch_dst": "14.14.14.1",
+          "udp_port_type": 2, 
+          "udp_port": 33445
+        }
+      },
+      {
+        "table": "SwitchIngress.encapsulate_lpm",
+        "priority": 252,
+        "match_field_type": ["prefix", "range"],
+        "match": {
+          "hdr.ipv4.dstAddr": {"eid": "10.3.0.0", "mask": 16},
+          "ig_md.rnd_load_balance_group": {"low": 0, "high": 127}
+        },
+        "action_name": "SwitchIngress.encapsulate_packet",
+        "action_params": {
+          "switch_src": "15.15.15.1",
+          "switch_dst": "14.14.14.1",
+          "udp_port_type": 2, 
+          "udp_port": 33445
+        }
+      },
+      {
+        "table": "SwitchIngress.encapsulate_lpm",
+        "priority": 252,
+        "match_field_type": ["prefix", "range"],
+        "match": {
+          "hdr.ipv4.dstAddr": {"eid": "10.4.0.0", "mask": 16},
+          "ig_md.rnd_load_balance_group": {"low": 0, "high": 127}
+        },
+        "action_name": "SwitchIngress.encapsulate_packet",
+        "action_params": {
+          "switch_src": "15.15.15.1",
+          "switch_dst": "14.14.14.2",
+          "udp_port_type": 0, 
+          "udp_port": 11111
+        }
+      },
+      {
+        "table": "SwitchIngress.encapsulate_lpm",
+        "priority": 252,
+        "match_field_type": ["prefix", "range"],
+        "match": {
+          "hdr.ipv4.dstAddr": {"eid": "12.12.2.2", "mask": 32},
+          "ig_md.rnd_load_balance_group": {"low": 0, "high": 127}
+        },
+        "action_name": "SwitchIngress.encapsulate_packet",
+        "action_params": {
+          "switch_src": "15.15.15.1",
+          "switch_dst": "10.16.16.16",
+          "udp_port_type": 0, 
+          "udp_port": 0
+        }
+      },
+      {
+        "table": "SwitchIngress.encapsulate_lpm",
+        "priority": 252,
+        "match_field_type": ["prefix", "range"],
+        "match": {
+          "hdr.ipv4.dstAddr": {"eid": "10.16.16.16", "mask": 32},
+          "ig_md.rnd_load_balance_group": {"low": 0, "high": 127}
+        },
+        "action_name": "SwitchIngress.encapsulate_packet",
+        "action_params": {
+          "switch_src": "15.15.15.1",
+          "switch_dst": "19.19.16.1",
+          "udp_port_type": 0, 
+          "udp_port": 0
+        }
+      },
+      {
+        "table": "SwitchIngress.encapsulate_lpm",
+        "priority": 252,
+        "match_field_type": ["prefix", "range"],
+        "match": {
+          "hdr.ipv4.dstAddr": {"eid": "224.1.1.1", "mask": 32},
+          "ig_md.rnd_load_balance_group": {"low": 0, "high": 63}
+        },
+        "action_name": "SwitchIngress.encapsulate_packet",
+        "action_params": {
+          "switch_src": "15.15.15.1",
+          "switch_dst": "19.19.224.1",
+          "udp_port_type": 0, 
+          "udp_port": 0
+        }
+      },
+      {
+        "table": "SwitchIngress.encapsulate_lpm",
+        "priority": 251,
+        "match_field_type": ["prefix", "range"],
+        "match": {
+          "hdr.ipv4.dstAddr": {"eid": "224.1.1.1", "mask": 32},
+          "ig_md.rnd_load_balance_group": {"low": 64, "high": 95}
+        },
+        "action_name": "SwitchIngress.encapsulate_packet",
+        "action_params": {
+          "switch_src": "15.15.15.1",
+          "switch_dst": "19.19.224.2",
+          "udp_port_type": 0, 
+          "udp_port": 0
+        }
+      },
+      {
+        "table": "SwitchIngress.encapsulate_lpm",
+        "priority": 250,
+        "match_field_type": ["prefix", "range"],
+        "match": {
+          "hdr.ipv4.dstAddr": {"eid": "224.1.1.1", "mask": 32},
+          "ig_md.rnd_load_balance_group": {"low": 95, "high": 127}
+        },
+        "action_name": "SwitchIngress.encapsulate_packet",
+        "action_params": {
+          "switch_src": "15.15.15.1",
+          "switch_dst": "19.19.224.3",
+          "udp_port_type": 0, 
+          "udp_port": 0
+        }
+      },
+
+
+      {
+        "table": "SwitchIngress.ipv4_lpm",
+        "match_field_type": ["prefix"],
+        "match": {
+          "hdr.ipv4.dstAddr": {"eid": "14.14.0.0", "mask": 16}
+        },
+        "action_name": "SwitchIngress.set_outgoing_port",
+        "action_params": {
+          "port": 2
+        }
+      },
+      {
+        "table": "SwitchIngress.ipv4_lpm",
+        "match_field_type": ["prefix"],
+        "match": {
+          "hdr.ipv4.dstAddr": {"eid": "19.19.0.0", "mask": 16}
+        },
+        "action_name": "SwitchIngress.set_outgoing_port",
+        "action_params": {
+          "port": 2
+        }
+      },
+      {
+        "table": "SwitchIngress.ipv4_lpm",
+        "match_field_type": ["prefix"],
+        "match": {
+          "hdr.ipv4.dstAddr": {"eid": "11.0.0.0", "mask": 8}
+        },
+        "action_name": "SwitchIngress.set_outgoing_port",
+        "action_params": {
+          "port": 2
+        }
+      },
+      {
+        "table": "SwitchIngress.ipv4_lpm",
+        "match_field_type": ["prefix"],
+        "match": {
+          "hdr.ipv4.dstAddr": {"eid": "10.16.16.16", "mask": 32}
+        },
+        "action_name": "SwitchIngress.set_outgoing_port",
+        "action_params": {
+          "port": 29
+        }
+      },
+      
+  
+  
+      {
+        "table": "SwitchIngress.forward",
+        "match_field_type": ["port"],
+        "match": {
+          "ig_intr_tm_md.ucast_egress_port": {"port": 2}
+        },
+        "action_name": "SwitchIngress.set_dmac",
+        "action_params": {
+          "dmac": "3c:fd:fe:c5:5c:69"
+        }
+      }
+    ]
+  }
+  
